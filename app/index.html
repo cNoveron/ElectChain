@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ElectChain - La democracia del futuro.</title>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'> 
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" 
+  integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">  
+  <script src="./app.js"></script>
+</head>
+<body>  
+  <div class="jumbotron jumbotron-fluid">    
+    <div class="container container-fluid">
+        <h1>ElectChain</h1>
+        <h2>.io</h2>
+        <h3>
+          Usted
+          <span class="black">
+            <span id="balance"></span>
+          </span>
+          ha emitido su voto.
+        </h3>
+      <br>
+        <h1>Send MetaCoin</h1>
+      <br>
+        <label for="amount">Amount:</label>
+        <input type="text" id="amount" placeholder="e.g., 95"></input>
+      <br>
+        <label for="address_de_contrato">To Address:</label>
+        <input type="text" id="address_de_contrato" placeholder="e.g., 0x93e66d9baea28c17d9fc393b53e3fbdd76899dae"></input>
+      <br><br>
+        <button id="send" onclick="App.consultar_vigencia()">consultar_vigencia</button>
+      <br><br>
+        <span id="status"></span>
+      <br>
+        <span class="hint">
+          <strong>Hint:</strong>
+          open the browser developer console to view any errors and warnings.
+        </span>      
+    </div>
+  </div>  
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" 
+  integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" 
+  integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" 
+  integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+</body>
+</html>

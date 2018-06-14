@@ -1,0 +1,60 @@
+html{
+  background: #00daa9;/*#365ed6;/*#e21ea5;*/
+}
+
+body {
+  margin-top: 10%;
+  font-family: "Open Sans", sans-serif;
+  background-image: url('http://images.adsttc.com.qtlcn.com/media/images/5930/5bee/e58e/ce38/8c00/02b1/slideshow/pic03_View_of_the_entrance_vtn.jpg?1496341482');
+  background-size: cover;
+}
+
+label {
+  display: inline-block;
+  width: 100px;
+}
+
+input {
+  width: 500px;
+  padding: 5px;
+  font-size: 16px;
+}
+
+button {
+  font-size: 16px;
+  padding: 5px;
+}
+
+h1{
+  font-weight: 700;
+}
+
+h1, h2 {
+  display: inline-block;
+  vertical-align: middle;
+  margin-top: 0px;
+  margin-bottom: 10px;
+}
+
+h2 {
+  color: #AAA;
+  font-size: 32px;
+}
+
+h3 {
+  font-weight: normal;
+  color: #AAA;
+  font-size: 24px;
+}
+
+.black {
+  color: black;
+}
+
+#balance {
+  color: black;
+}
+
+.hint {
+  color: #666;
+}
