@@ -10,12 +10,12 @@ module.exports = {
       host: '127.0.0.1',
       port: 7545,
       network_id: '*' // Match any network id
-    },
+    }/* ,
     INFURAnet: {
       provider: function() {
-        return new HDWalletProvider(mnemonic, "https://infuranet.infura.io/eQMiMPMRRHoldZ7uH7U9")
+        return new HDWalletProvider(mnemonic, "https://infuranet.infura.io/eQMiMPMRRHoldZ7uH7U9",0)
       },
       network_id: '*'
-    }
+    } */
   }
 }

@@ -6,16 +6,18 @@ import { default as Web3 } from 'web3'
 import { default as contract } from 'truffle-contract'
 
 // Import our contract artifacts and turn them into usable abstractions.
-import autorizador_de_electores_artifacts from '../../build/contracts/autorizador_de_electores.json'
-import verificador_de_vigencias_artifacts from '../../build/contracts/verificador_de_vigencias.json'
-import contador_de_votos_artifacts from '../../build/contracts/contador_de_votos.json'
-import guardador_de_mensajes_artifacts from '../../build/contracts/guardador_de_mensajes.json'
+import guardador_de_mensajes_artifacts      from '../../build/contracts/guardador_de_mensajes.json'
+import autorizador_de_direcciones_artifacts from '../../build/contracts/autorizador_de_direcciones.json'
+import contador_de_votos_artifacts          from '../../build/contracts/contador_de_votos.json'
+import verificador_de_vigencias_artifacts   from '../../build/contracts/verificador_de_vigencias.json'
+import autorizador_de_electores_artifacts   from '../../build/contracts/autorizador_de_electores.json'
 // contador_de_votos is our usable abstraction, which we'll use through the code below.
 var 
-autorizador_de_electores  = contract(autorizador_de_electores_artifacts),
-verificador_de_vigencias  = contract(verificador_de_vigencias_artifacts),
+guardador_de_mensajes     = contract(guardador_de_mensajes_artifacts),
+autorizador_de_direcciones= contract(autorizador_de_direcciones_artifacts),
 contador_de_votos         = contract(contador_de_votos_artifacts),
-guardador_de_mensajes     = contract(guardador_de_mensajes_artifacts)
+verificador_de_vigencias  = contract(verificador_de_vigencias_artifacts),
+autorizador_de_electores  = contract(autorizador_de_electores_artifacts)
 const 
 Web3Utils = require('web3-utils'),
 txDecoder = require('ethereum-tx-decoder')
@@ -24,17 +26,17 @@ txDecoder = require('ethereum-tx-decoder')
 // For application bootstrapping, check out window.addEventListener below.
 var accounts
 var account
-//
 
 window.App = {
 
   start: function() {
     var app = this
     // Bootstrap the contador_de_votos abstraction for Use.
-    autorizador_de_electores.setProvider(web3.currentProvider)
-    verificador_de_vigencias.setProvider(web3.currentProvider)
-    contador_de_votos.setProvider(web3.currentProvider)
     guardador_de_mensajes.setProvider(web3.currentProvider)
+    autorizador_de_direcciones.setProvider(web3.currentProvider)
+    contador_de_votos.setProvider(web3.currentProvider)
+    verificador_de_vigencias.setProvider(web3.currentProvider)
+    autorizador_de_electores.setProvider(web3.currentProvider)
     app.getAccounts()
   },
 
@@ -55,10 +57,11 @@ window.App = {
         }
         accounts  = passed_accounts
         account   = accounts[0]
-        autorizador_de_electores.defaults({from: account})
+        guardador_de_mensajes.defaults({from: account})
+        autorizador_de_direcciones.defaults({from: account})
         contador_de_votos.defaults({from: account})
         verificador_de_vigencias.defaults({from: account})
-        guardador_de_mensajes.defaults({from: account})
+        autorizador_de_electores.defaults({from: account})
         app.placeListeners()
       }
     )
@@ -67,18 +70,6 @@ window.App = {
   placeListeners: function(){
     var app = this
 
-    guardador_de_mensajes.deployed()
-    .then(function(guardador_de_mensajes_deployed){
-      return guardador_de_mensajes_deployed.mensaje_recibido(function(error,log){
-        if(!error)
-          app.actualizarEstado(
-            log.event+" con_contenido "+Web3Utils.toAscii(log.args.con_contenido)
-          )
-        else
-          app.actualizarEstado("error en voto_emitido "+error)
-      })
-    })
-
     contador_de_votos.deployed()
     .then(function(contador_de_votos_deployed){
       contador_de_votos_deployed.voto_emitido(function(error,log){
@@ -86,19 +77,7 @@ window.App = {
           app.actualizarEstado(
             log.event+" por_candidato_de_apellidos "+Web3Utils.toAscii(log.args.por_candidato_de_apellidos)+
             " cuyo_conteo_incremento_a "+log.args.cuyo_conteo_incremento_a.c+
-            " con_mensaje_adjunto "+Web3Utils.toAscii(log.args.con_mensaje_adjunto)+
             " transactionHash "+log.transactionHash
-          )
-        else
-          app.actualizarEstado("error en voto_emitido "+error)
-      })
-      return contador_de_votos_deployed
-    })
-    .then(function(contador_de_votos_deployed){
-      contador_de_votos_deployed.contrato_construido(function(error,log){
-        if(!error)
-          app.actualizarEstado(
-            log.event+" con_guardador_en "+log.args.con_guardador_en
           )
         else
           app.actualizarEstado("error en voto_emitido "+error)
@@ -132,26 +111,26 @@ window.App = {
 
     autorizador_de_electores.deployed()
     .then(function(autorizador_de_electores_deployed) {
-      return autorizador_de_electores_deployed.elector_autorizado_para_votar(function(error,log){
+      return autorizador_de_electores_deployed.elector_autorizado(function(error,log){
         if(!error)
           app.actualizarEstado(
-            log.event+" al_digerir_su_credencial_se_obtuvo "+log.args.al_digerir_su_credencial_se_obtuvo
+            log.event+" de_credencial "+log.args.de_credencial
           )
         else
-          app.actualizarEstado("error en elector_autorizado_para_votar "+error)
+          app.actualizarEstado("error en elector_autorizado "+error)
       })
     })
     .then(function() {
       return autorizador_de_electores.deployed()
     })
     .then(function(autorizador_de_electores_deployed) {
-      return autorizador_de_electores_deployed.elector_no_puede_votar(function(error,log){
+      return autorizador_de_electores_deployed.elector_no_tiene_permiso_de_votar(function(error,log){
         if(!error)
           app.actualizarEstado(
-            log.event+" al_digerir_su_credencial_se_obtuvo "+log.args.al_digerir_su_credencial_se_obtuvo
+            log.event+" a_causa_de "+log.args.a_causa_de+" de_credencial "+log.args.de_credencial
           )
         else
-          app.actualizarEstado("error en elector_no_puede_votar "+error)
+          app.actualizarEstado("error en elector_no_tiene_permiso_de_votar "+error)
       })
     })
     .then(function() {
@@ -167,11 +146,11 @@ window.App = {
   testificar_vigencia: function(){
     var 
     app = this,
-    de_la_credencial = document.getElementById("testificar_vigencia_de_la_credencial").value
+    OCR = document.getElementById("OCR").value
     verificador_de_vigencias.deployed()
     .then(function(verificador_de_vigencias_deployed){
-      var hash_de_la_credencial = web3.sha3(de_la_credencial)
-      return verificador_de_vigencias_deployed.testificar_vigencia(hash_de_la_credencial)
+      var hash_OCR = web3.sha3(OCR)
+      return verificador_de_vigencias_deployed.testificar_vigencia(hash_OCR)
     })
     .catch(function(e){
       app.actualizarEstado("error al testificar_vigencia "+e)
@@ -183,11 +162,11 @@ window.App = {
   consultar_vigencia: function() {
     var 
     app = this,
-    de_la_credencial = document.getElementById("consultar_vigencia_de_la_credencial").value
+    OCR = document.getElementById("OCR").value
     verificador_de_vigencias.deployed()
     .then(function(verificador_de_vigencias_deployed){
-      var hash_de_la_credencial = web3.sha3(de_la_credencial)
-      return verificador_de_vigencias_deployed.consultar_vigencia(hash_de_la_credencial)
+      var hash_OCR = web3.sha3(OCR)
+      return verificador_de_vigencias_deployed.consultar_vigencia(hash_OCR)
     })
     .catch(function(e) {
       app.actualizarEstado("error al consultar_vigencia")
@@ -195,25 +174,16 @@ window.App = {
     })
   },
 
-  procesar_voto: function() {
+  procesar_voto: function(por_el_candidato) {
     var 
     app = this,
-    por_el_candidato    = document.getElementById("procesar_voto_por_el_candidato_por_el_candidato").value,
-    con_mensaje_adjunto = document.getElementById("procesar_voto_por_el_candidato_con_mensaje_adjunto").value,
-    con_credencial      = document.getElementById("procesar_voto_por_el_candidato_con_credencial").value  
-    guardador_de_mensajes.deployed()
-    .then(function(){
-      return contador_de_votos.deployed()
-    })
-    .then(function(){
-      return autorizador_de_electores.deployed()
-    })
+    OCR = document.getElementById("OCR").value
+    autorizador_de_electores.deployed()
     .then(function(autorizador_de_electores_deployed){
-      var hash_de_la_credencial = Web3Utils.sha3(con_credencial)
+      var hash_OCR = Web3Utils.sha3(OCR)
       return autorizador_de_electores_deployed.procesar_voto(
         por_el_candidato,
-        con_mensaje_adjunto,
-        hash_de_la_credencial,
+        hash_OCR,
         {from: accounts[1]}
       )
     })
@@ -226,33 +196,31 @@ window.App = {
   test: function() {
     var 
     app = this,
-    de_la_credencial = "21206852hef80237940z",
-    hash_de_la_credencial,
-    contador_de_votos_deployed
+    OCR = "21206852hef80237940z",
+    autorizador_de_electores_deployed,
+    hash_OCR
     verificador_de_vigencias.deployed()
     .then(function(verificador_de_vigencias_deployed){
-      hash_de_la_credencial = web3.sha3(de_la_credencial)
-      return verificador_de_vigencias_deployed.testificar_vigencia(hash_de_la_credencial)
+      hash_OCR = web3.sha3(OCR)
+      return verificador_de_vigencias_deployed.testificar_vigencia(hash_OCR)
     })
     .then(function(){
-      return guardador_de_mensajes.deployed()
-    })
-    .then(function(guardador_de_mensajes_deployed){
-      guardador_de_mensajes_deployed.guardar("Pudin")
-      return contador_de_votos.deployed()
+      return autorizador_de_electores.deployed()
     })
     .then(function(resultado){
-      contador_de_votos_deployed = resultado
-      return contador_de_votos_deployed.address_de_guardador_de_mensajes()
+      autorizador_de_electores_deployed = resultado
+      return autorizador_de_direcciones.deployed()
     })
-    .then(function(address_de_guardador_de_mensajes){
-      console.log(address_de_guardador_de_mensajes)
-      return
+    .then(function(autorizador_de_direcciones_deployed){
+      return autorizador_de_direcciones_deployed.asignar(
+        autorizador_de_electores_deployed.address,
+        "autorizador_de_electores"
+      )
     })
     .then(function(){
-      return contador_de_votos_deployed.contabilizar_voto(
+      return autorizador_de_electores_deployed.procesar_voto(
         "Anaya",
-        "Hola"
+        hash_OCR
       )
     })
     .catch(function(e) {

@@ -1,21 +1,30 @@
-var guardador_de_mensajes   = artifacts.require("./guardador_de_mensajes.sol")
-var contador_de_votos       = artifacts.require("./contador_de_votos.sol")
-var verificador_de_vigencias= artifacts.require("./verificador_de_vigencias.sol")
-var autorizador_de_electores= artifacts.require("./autorizador_de_electores.sol")
+var guardador_de_mensajes       = artifacts.require("./guardador_de_mensajes.sol")
+var autorizador_de_direcciones  = artifacts.require("./autorizador_de_direcciones.sol")
+var contador_de_votos           = artifacts.require("./contador_de_votos.sol")
+var verificador_de_vigencias    = artifacts.require("./verificador_de_vigencias.sol")
+var autorizador_de_electores    = artifacts.require("./autorizador_de_electores.sol")
 
 module.exports = function(deployer){
 
-  // console.log("2_deploy_contracts.js")
+  console.log("2_deploy_contracts.js")
   var 
-  contador_de_votos_deployed,
-  verificador_de_vigencias_deployed
+  contador_de_votos_deployed
 
   deployer.deploy(guardador_de_mensajes)
-  .then(function(guardador_de_mensajes_deployed){
+  .then(function(){
+    // console.log("guardador_de_mensajes_deployed.address\t\t",guardador_de_mensajes_deployed.address)
+    return deployer.deploy(
+      autorizador_de_direcciones
+    )
+  })
+  .then(function(){
+    return autorizador_de_direcciones.deployed()
+  })
+  .then(function(autorizador_de_direcciones_deployed){
     // console.log("guardador_de_mensajes_deployed.address\t\t",guardador_de_mensajes_deployed.address)
     return deployer.deploy(
       contador_de_votos,
-      guardador_de_mensajes_deployed.address
+      autorizador_de_direcciones_deployed.address
     )
   })
   .then(function(){

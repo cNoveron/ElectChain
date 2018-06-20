@@ -12,16 +12,15 @@ contract autorizador_de_electores{
     // de electores que han sido marcados por haber emitido un único voto.
     mapping(bytes => bool) marca_de_emision_de_voto_desde_bytes;
 
-    /*  
-    El presente contrato se hará referencia a la instancia de otro contrato 
-    llamado */contador_de_votos/*, y para accesar a sus funciones se hará 
-    referencia a la instancia de dicho contrato por medio de un identificador
-    llamado "*/uso_de_contador_de_votos_para;/*.
-    
-    El presente contrato se hará referencia a la instancia de otro contrato 
-    llamado */verificador_de_vigencias/*, y para accesar a sus funciones se hará 
-    referencia a la instancia de dicho contrato por medio de un identificador
-    llamado "*/uso_de_verificador_de_vigencias_para;/*.
+    /*  El presente contrato se hará referencia a la instancia de otro contrato 
+        llamado */contador_de_votos/*, y para accesar a sus funciones se hará 
+        referencia a la instancia de dicho contrato por medio de un identificador
+        llamado "*/uso_de_contador_de_votos_para;/*.
+        
+        El presente contrato se hará referencia a la instancia de otro contrato 
+        llamado */verificador_de_vigencias/*, y para accesar a sus funciones se hará 
+        referencia a la instancia de dicho contrato por medio de un identificador
+        llamado "*/uso_de_verificador_de_vigencias_para;/*.
     */
 
     constructor(
@@ -29,42 +28,44 @@ contract autorizador_de_electores{
         address donde_reside_el_verificador_de_vigencias
     ) 
     public{
-        /*  
-        Dicho identificador hace referencia a la única copia del contrato llamado
+    /*  Dicho identificador hace referencia a la única copia del contrato llamado
         */uso_de_contador_de_votos_para/* 
-        la única copia */=/* del contrato */contador_de_votos/* 
+        la única copia del contrato*/ = /* llamado */contador_de_votos/* 
         que se alojará en la dirección */(donde_reside_el_contador_de_votos);/*
         de la red Ropsten de Ethereum.
         
         Se hará */uso_de_verificador_de_vigencias_para/* 
-        la única copia */=/* del contrato */verificador_de_vigencias/*
+        la única copia del contrato*/ = /* llamado */verificador_de_vigencias/*
         que se alojará en la dirección */(donde_reside_el_verificador_de_vigencias);/*
         de la red Ropsten de Ethereum. 
-        */
+    */
     }
 
-    function procesar_voto(string por_el_candidato, bytes con_credencial)
+    function procesar_voto(bytes por_el_candidato, bytes de_credencial)
     external{
         
-        if(
-            marca_de_emision_de_voto_desde_bytes[con_credencial] == false
-        ){
-            uso_de_contador_de_votos_para.contabilizar_voto(por_el_candidato);
-            marca_de_emision_de_voto_desde_bytes[con_credencial] = true;
-            emit elector_autorizado(con_credencial);
-        }
+        if(uso_de_verificador_de_vigencias_para.consultar_vigencia(de_credencial))
+            if(marca_de_emision_de_voto_desde_bytes[de_credencial] == false){
+                uso_de_contador_de_votos_para.contabilizar_voto(por_el_candidato);
+                marca_de_emision_de_voto_desde_bytes[de_credencial] = true;
+                emit elector_autorizado(de_credencial);
+            }
+            else
+            {
+                emit elector_no_tiene_permiso_de_votar("haber emitido ya un voto haciendo uso",de_credencial);
+            }
         else
         {
-            emit elector_vetado("haber emitido ya un voto",con_credencial);
+            emit elector_no_tiene_permiso_de_votar("no haberse comprobado vigencia",de_credencial);
         }
     }
 
     event elector_autorizado(
-        bytes al_digerir_su_credencial_se_obtuvo
+        bytes de_credencial
     );
     
-    event elector_vetado(
+    event elector_no_tiene_permiso_de_votar(
         string a_causa_de,
-        bytes al_digerir_su_credencial_se_obtuvo
+        bytes de_credencial
     );
 }
