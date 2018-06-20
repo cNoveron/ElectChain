@@ -1,15 +1,14 @@
 pragma solidity ^0.4.17;
 
 contract verificador_de_vigencias{
-    // Rinkeby: 
+    // Rinkeby: 0x35a4bdbc6488f5066228b1c99c7fde5fbbd2639c
+    // Ropsten: 
     // TestRPC: 
     
-    // Al desplegar este contrato se creará un índice de direcciones de cuentas
-    // de electores que han sido marcados por haber emitido un único voto.
     mapping(bytes => bool) vigencia_desde_bytes;    
 
     function consultar_vigencia(bytes de_la_credencial)
-    external view returns(bool){
+    external returns(bool){
         bool resultado = vigencia_desde_bytes[de_la_credencial];
         emit vigencia_consultada(de_la_credencial,resultado);
         return resultado;

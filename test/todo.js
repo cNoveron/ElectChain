@@ -5,50 +5,15 @@ var autorizador_de_electores= artifacts.require("./autorizador_de_electores.sol"
 
 
 var Web3 = require('web3')
-// var web3 = new Web3(Web3.givenProvider || "ws://localhost:8545")
+var web3 = new Web3(Web3.givenProvider || "ws://localhost:7545")
 if (typeof web3 !== 'undefined') {
   web3 = new Web3(web3.currentProvider)
 }
 else{
-  web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
+  web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"))
 }
 
 contract('autorizador_de_electores', function(accounts) {
-
-  function buscar_en(Duloc,el_espejo_magico) { 
-    for (var i = 0; i < Duloc.logs.length; i++) {
-      var espejo = Duloc.logs[i];
-  
-      if (espejo.event == el_espejo_magico) {
-        console.log("Milord, lo encontramos!\n",espejo)
-        break;
-      }
-    }
-  }
-
-  function transaction_JSON_receipt_logs_data(transaction_JSON) { 
-    var transaction_JSON_receipt_logs = transaction_JSON.receipt.logs
-    for (var i = 0; i < transaction_JSON_receipt_logs.length; i++) {
-      var data = transaction_JSON_receipt_logs[i].data
-      console.log(
-        "data:",
-        web3._extend.utils.toAscii(data)
-      )
-    }
-  }
-
-  function transaction_JSON_receipt_logs_topics(transaction_JSON) { 
-    var transaction_JSON_receipt_logs = transaction_JSON.receipt.logs
-    for (var i = 0; i < transaction_JSON_receipt_logs.length; i++) {
-      for(var j = 0; j < transaction_JSON_receipt_logs[i].topics.length; j++){
-        var topic = transaction_JSON_receipt_logs[i].topics[j]
-        console.log(
-          "topic["+j+"]",
-          web3._extend.utils.toAscii(topic)
-        )
-      }
-    }
-  }
 
   function print_elector_autorizado(error,log){
     if(!error){
@@ -71,7 +36,7 @@ contract('autorizador_de_electores', function(accounts) {
   }
   
   function print_voto_emitido(error,log){
-    if(!error){
+    if(!error)
       console.log(
         log.event,"por_candidato_de_apellidos",log.args.por_candidato_de_apellidos,
         "\ncuyo_conteo_incremento_a",log.args.cuyo_conteo_incremento_a.c,
@@ -79,7 +44,6 @@ contract('autorizador_de_electores', function(accounts) {
         "\ntransactionHash :",log.transactionHash,
         "\n"
       )
-    }
   }
 
   function print_vigencia_testificada(error,log){
@@ -121,7 +85,6 @@ contract('autorizador_de_electores', function(accounts) {
 
   it("debería emitir voto fallido al segundo voto emitido",function(){
     var autorizador_de_electores_deployed
-    var verificador_de_vigencias_deployed
     var primero_del_padron = 0x48716ad928da
     return deploy_dependientes()
     .then(function(verificador_de_vigencias_deployed){
@@ -131,8 +94,6 @@ contract('autorizador_de_electores', function(accounts) {
     })
     .then(function(verificador_de_vigencias_deployed){
         repeat(()=>{
-      // for(;primero_del_padron<926+25;primero_del_padron++){
-          // console.log(primero_del_padron)
           verificador_de_vigencias_deployed.testificar_vigencia(""+primero_del_padron++)
         },
         25

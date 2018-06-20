@@ -1,8 +1,8 @@
 // Import the page's CSS. Webpack will know what to do with it.
-import "../stylesheets/app.css";
+import "../stylesheets/app.css"
 
 // Import libraries we need.
-import { default as Web3 } from 'web3';
+import { default as Web3 } from 'web3'
 import { default as contract } from 'truffle-contract'
 
 // Import our contract artifacts and turn them into usable abstractions.
@@ -10,107 +10,263 @@ import autorizador_de_electores_artifacts from '../../build/contracts/autorizado
 import verificador_de_vigencias_artifacts from '../../build/contracts/verificador_de_vigencias.json'
 import contador_de_votos_artifacts from '../../build/contracts/contador_de_votos.json'
 import guardador_de_mensajes_artifacts from '../../build/contracts/guardador_de_mensajes.json'
-
 // contador_de_votos is our usable abstraction, which we'll use through the code below.
-var autorizador_de_electoress = contract(autorizador_de_electores_artifacts);
-var verificador_de_vigencias = contract(verificador_de_vigencias_artifacts);
-var contador_de_votos = contract(contador_de_votos_artifacts);
-var guardador_de_mensajes = contract(guardador_de_mensajes_artifacts);
-
+var 
+autorizador_de_electores  = contract(autorizador_de_electores_artifacts),
+verificador_de_vigencias  = contract(verificador_de_vigencias_artifacts),
+contador_de_votos         = contract(contador_de_votos_artifacts),
+guardador_de_mensajes     = contract(guardador_de_mensajes_artifacts)
+const 
+Web3Utils = require('web3-utils'),
+txDecoder = require('ethereum-tx-decoder')
 // The following code is simple to show off interacting with your contracts.
 // As your needs grow you will likely need to change its form and structure.
 // For application bootstrapping, check out window.addEventListener below.
-var accounts;
-var account;
+var accounts
+var account
+//
 
 window.App = {
+
   start: function() {
-    var html_element = this;
-
+    var app = this
     // Bootstrap the contador_de_votos abstraction for Use.
-    autorizador_de_electores.setProvider(web3.currentProvider);
-    verificador_de_vigencias.setProvider(web3.currentProvider);
-    contador_de_votos.setProvider(web3.currentProvider);
-    guardador_de_mensajes.setProvider(web3.currentProvider);
-
-    html_element.getAccounts()
+    autorizador_de_electores.setProvider(web3.currentProvider)
+    verificador_de_vigencias.setProvider(web3.currentProvider)
+    contador_de_votos.setProvider(web3.currentProvider)
+    guardador_de_mensajes.setProvider(web3.currentProvider)
+    app.getAccounts()
   },
 
   getAccounts: function(){
-    // Get the initial account balance so it can be displayed.
+    var app = this
     web3.eth.getAccounts(
-      function(err, passed_accounts) {        
+      function(err, passed_accounts){
+        console.log("passed_accounts",passed_accounts)
         if (err != null) {
           alert("There was an error fetching your accounts.")
+          console.log("There was an error fetching your accounts.")
           return
         }
-        if (passed_accounts.length == 0) {
+        if (passed_accounts.length == 0){
           alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.")
+          console.log("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.")
           return
         }
         accounts  = passed_accounts
         account   = accounts[0]
-        html_element.refreshBalance()
+        autorizador_de_electores.defaults({from: account})
+        contador_de_votos.defaults({from: account})
+        verificador_de_vigencias.defaults({from: account})
+        guardador_de_mensajes.defaults({from: account})
+        app.placeListeners()
       }
     )
   },
 
-  setStatus: function(message) {
-    var status = document.getElementById("status")
-    status.innerHTML = message
+  placeListeners: function(){
+    var app = this
+
+    guardador_de_mensajes.deployed()
+    .then(function(guardador_de_mensajes_deployed){
+      return guardador_de_mensajes_deployed.mensaje_recibido(function(error,log){
+        if(!error)
+          app.actualizarEstado(
+            log.event+" con_contenido "+Web3Utils.toAscii(log.args.con_contenido)
+          )
+        else
+          app.actualizarEstado("error en voto_emitido "+error)
+      })
+    })
+
+    contador_de_votos.deployed()
+    .then(function(contador_de_votos_deployed){
+      contador_de_votos_deployed.voto_emitido(function(error,log){
+        if(!error)
+          app.actualizarEstado(
+            log.event+" por_candidato_de_apellidos "+Web3Utils.toAscii(log.args.por_candidato_de_apellidos)+
+            " cuyo_conteo_incremento_a "+log.args.cuyo_conteo_incremento_a.c+
+            " con_mensaje_adjunto "+Web3Utils.toAscii(log.args.con_mensaje_adjunto)+
+            " transactionHash "+log.transactionHash
+          )
+        else
+          app.actualizarEstado("error en voto_emitido "+error)
+      })
+      return contador_de_votos_deployed
+    })
+    .then(function(contador_de_votos_deployed){
+      contador_de_votos_deployed.contrato_construido(function(error,log){
+        if(!error)
+          app.actualizarEstado(
+            log.event+" con_guardador_en "+log.args.con_guardador_en
+          )
+        else
+          app.actualizarEstado("error en voto_emitido "+error)
+      })
+      return contador_de_votos_deployed
+    })
+
+    verificador_de_vigencias.deployed()
+    .then(function(verificador_de_vigencias_deployed){
+      verificador_de_vigencias_deployed.vigencia_testificada(function(error,log){
+        if(!error)          
+          app.actualizarEstado(
+            ""+log.event+" para_credencial "+log.args.para_credencial
+          )
+        else
+          app.actualizarEstado("error en vigencia_testificada"+error)
+      })
+      return verificador_de_vigencias_deployed
+    })
+    .then(function(verificador_de_vigencias_deployed) {
+      return verificador_de_vigencias_deployed.vigencia_consultada(function(error,log){
+        if(!error)
+          app.actualizarEstado(
+            log.event+" para_credencial "+log.args.para_credencial+
+            " cuya_vigencia_es "+log.args.cuya_vigencia_es
+          )
+        else
+          app.actualizarEstado("error en vigencia_consultada "+error)
+      })
+    })
+
+    autorizador_de_electores.deployed()
+    .then(function(autorizador_de_electores_deployed) {
+      return autorizador_de_electores_deployed.elector_autorizado_para_votar(function(error,log){
+        if(!error)
+          app.actualizarEstado(
+            log.event+" al_digerir_su_credencial_se_obtuvo "+log.args.al_digerir_su_credencial_se_obtuvo
+          )
+        else
+          app.actualizarEstado("error en elector_autorizado_para_votar "+error)
+      })
+    })
+    .then(function() {
+      return autorizador_de_electores.deployed()
+    })
+    .then(function(autorizador_de_electores_deployed) {
+      return autorizador_de_electores_deployed.elector_no_puede_votar(function(error,log){
+        if(!error)
+          app.actualizarEstado(
+            log.event+" al_digerir_su_credencial_se_obtuvo "+log.args.al_digerir_su_credencial_se_obtuvo
+          )
+        else
+          app.actualizarEstado("error en elector_no_puede_votar "+error)
+      })
+    })
+    .then(function() {
+      app.test()
+    })
   },
 
-  refreshBalance: function(){
-    var html_element = this
-    var meta
-    contador_de_votos.deployed()
-    .then(function(instance){
-      meta = instance
-      return meta.getBalance.call(account, {from: account})
-    })
-    .then(function(value){
-      var balance_element = document.getElementById("balance")
-      balance_element.innerHTML = value.valueOf()
+  actualizarEstado: function(message){
+    var status = document.getElementById("status")
+    status.insertAdjacentHTML('beforeend',"<p>"+message)
+  },
+
+  testificar_vigencia: function(){
+    var 
+    app = this,
+    de_la_credencial = document.getElementById("testificar_vigencia_de_la_credencial").value
+    verificador_de_vigencias.deployed()
+    .then(function(verificador_de_vigencias_deployed){
+      var hash_de_la_credencial = web3.sha3(de_la_credencial)
+      return verificador_de_vigencias_deployed.testificar_vigencia(hash_de_la_credencial)
     })
     .catch(function(e){
-      console.log(e)
-      html_element.setStatus("Error getting balance; see log.")
+      app.actualizarEstado("error al testificar_vigencia "+e)
+      console.log("error al testificar_vigencia "+e)
+    })
+
+  },
+
+  consultar_vigencia: function() {
+    var 
+    app = this,
+    de_la_credencial = document.getElementById("consultar_vigencia_de_la_credencial").value
+    verificador_de_vigencias.deployed()
+    .then(function(verificador_de_vigencias_deployed){
+      var hash_de_la_credencial = web3.sha3(de_la_credencial)
+      return verificador_de_vigencias_deployed.consultar_vigencia(hash_de_la_credencial)
+    })
+    .catch(function(e) {
+      app.actualizarEstado("error al consultar_vigencia")
+      console.log("error al consultar_vigencia",e)
     })
   },
 
-  sendCoin: function() {
-    var html_element = this
+  procesar_voto: function() {
+    var 
+    app = this,
+    por_el_candidato    = document.getElementById("procesar_voto_por_el_candidato_por_el_candidato").value,
+    con_mensaje_adjunto = document.getElementById("procesar_voto_por_el_candidato_con_mensaje_adjunto").value,
+    con_credencial      = document.getElementById("procesar_voto_por_el_candidato_con_credencial").value  
+    guardador_de_mensajes.deployed()
+    .then(function(){
+      return contador_de_votos.deployed()
+    })
+    .then(function(){
+      return autorizador_de_electores.deployed()
+    })
+    .then(function(autorizador_de_electores_deployed){
+      var hash_de_la_credencial = Web3Utils.sha3(con_credencial)
+      return autorizador_de_electores_deployed.procesar_voto(
+        por_el_candidato,
+        con_mensaje_adjunto,
+        hash_de_la_credencial,
+        {from: accounts[1]}
+      )
+    })
+    .catch(function(e) {
+      app.actualizarEstado("error al procesar_voto")
+      console.log("error al procesar_voto",e)
+    })
+  },
 
-    var amount = parseInt(document.getElementById("amount").value)
-    var receiver = document.getElementById("receiver").value
-
-    this.setStatus("Initiating transaction... (please wait)")
-
-    var meta;
-    contador_de_votos.deployed().then(function(instance) {
-      meta = instance;
-      return meta.sendCoin(receiver, amount, {from: account});
-    }).then(function() {
-      html_element.setStatus("Transaction complete!");
-      html_element.refreshBalance();
-    }).catch(function(e) {
-      console.log(e);
-      html_element.setStatus("Error sending coin; see log.");
-    });
+  test: function() {
+    var 
+    app = this,
+    de_la_credencial = "21206852hef80237940z",
+    hash_de_la_credencial,
+    contador_de_votos_deployed
+    verificador_de_vigencias.deployed()
+    .then(function(verificador_de_vigencias_deployed){
+      hash_de_la_credencial = web3.sha3(de_la_credencial)
+      return verificador_de_vigencias_deployed.testificar_vigencia(hash_de_la_credencial)
+    })
+    .then(function(){
+      return guardador_de_mensajes.deployed()
+    })
+    .then(function(guardador_de_mensajes_deployed){
+      guardador_de_mensajes_deployed.guardar("Pudin")
+      return contador_de_votos.deployed()
+    })
+    .then(function(resultado){
+      contador_de_votos_deployed = resultado
+      return contador_de_votos_deployed.address_de_guardador_de_mensajes()
+    })
+    .then(function(address_de_guardador_de_mensajes){
+      console.log(address_de_guardador_de_mensajes)
+      return
+    })
+    .then(function(){
+      return contador_de_votos_deployed.contabilizar_voto(
+        "Anaya",
+        "Hola"
+      )
+    })
+    .catch(function(e) {
+      app.actualizarEstado("test: error al procesar_voto "+e)
+      console.log("test: error al procesar_voto",e)
+    })
   }
-};
+}
 
 window.addEventListener('load', function() {
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
-  if (typeof web3 !== 'undefined') {
-    console.warn("Using web3 detected from external source. If you find that your accounts don't appear or you have 0 contador_de_votos, ensure you've configured that source properly. If using MetaMask, see the following link. Feel free to delete this warning. :) http://truffleframework.com/tutorials/truffle-and-metamask")
-    // Use Mist/MetaMask's provider
-    window.web3 = new Web3(web3.currentProvider);
-  } else {
-    console.warn("No web3 detected. Falling back to http://127.0.0.1:9545. You should remove this fallback when you deploy live, as it's inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask");
-    // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-    window.web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:9545"));
-  }
+  var Web3 = require('web3')
+  window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"))
+  // window.web3 = new Web3(new Web3.providers.HttpProvider("https://infuranet.infura.io/eQMiMPMRRHoldZ7uH7U9"))
 
-  App.start();
-});
+  App.start()
+})

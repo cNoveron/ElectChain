@@ -5,17 +5,18 @@ html{
 body {
   margin-top: 10%;
   font-family: "Open Sans", sans-serif;
-  background-image: url('http://images.adsttc.com.qtlcn.com/media/images/5930/5bee/e58e/ce38/8c00/02b1/slideshow/pic03_View_of_the_entrance_vtn.jpg?1496341482');
   background-size: cover;
 }
 
 label {
-  display: inline-block;
-  width: 100px;
+  padding: 6px!important;
+  width: 200px!important;
+  text-align: right!important;
+  background: #7cff7a!important;
+  font-weight: bold!important;
 }
 
 input {
-  width: 500px;
   padding: 5px;
   font-size: 16px;
 }
@@ -51,10 +52,72 @@ h3 {
   color: black;
 }
 
-#balance {
-  color: black;
+#console {
+  background: #333;
+  padding: 16px;
+  max-height: 300px;
+  position: fixed;
+  overflow: scroll;
 }
 
 .hint {
   color: #666;
+}
+
+.jumbotron > .row {
+  margin: 16px;
+}
+
+.col.card {
+  margin: 16px;
+  margin-left: 0;
+  padding: 0;
+}
+
+.card-img-top {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.card-img-top-container {
+  margin: auto;
+  overflow: hidden;
+}
+
+.morena{
+  background: rgb(92, 18, 9)!important;
+}
+
+.pt{
+  background: rgb(204, 0, 0)!important;
+}
+
+.pes{
+  background: rgb(77, 5, 110)!important;
+}
+
+.pri{
+  background: rgb(0, 70, 15)!important;
+}
+
+.pvem{
+  background: rgb(28, 175, 72)!important;
+}
+
+.panal{
+  background: rgb(12, 158, 146)!important;
+}
+
+.prd{
+  background: rgb(255, 238, 0)!important;
+  color: #000;
+}
+
+.pan{
+  background: rgb(30, 0, 197)!important;
+}
+
+.mc{
+  background: rgb(235, 133, 0)!important;
 }
