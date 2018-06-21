@@ -67,6 +67,21 @@ window.App = {
     )
   },
 
+  imprimirEnConsola: function(message){
+    var status = document.getElementById("status")
+    status.insertAdjacentHTML(
+      'beforeend',
+      "<p>"+message
+    )
+  },
+
+  imprimirEventoEnConsola: function(log,message){
+    this.imprimirEnConsola(
+      "<p class=\"timestamp\">"+new Date(web3.eth.getBlock(log.blockNumber).timestamp*1000)+"</p>"+
+      " >> "+message
+    )
+  },
+
   placeListeners: function(){
     var app = this
 
@@ -74,13 +89,14 @@ window.App = {
     .then(function(contador_de_votos_deployed){
       contador_de_votos_deployed.voto_emitido(function(error,log){
         if(!error)
-          app.actualizarEstado(
+          app.imprimirEventoEnConsola(
+            log,
             log.event+" por_candidato_de_apellidos "+Web3Utils.toAscii(log.args.por_candidato_de_apellidos)+
             " cuyo_conteo_incremento_a "+log.args.cuyo_conteo_incremento_a.c+
             " transactionHash "+log.transactionHash
           )
         else
-          app.actualizarEstado("error en voto_emitido "+error)
+          app.imprimirEnConsola("error en voto_emitido "+error)
       })
       return contador_de_votos_deployed
     })
@@ -89,23 +105,25 @@ window.App = {
     .then(function(verificador_de_vigencias_deployed){
       verificador_de_vigencias_deployed.vigencia_testificada(function(error,log){
         if(!error)          
-          app.actualizarEstado(
-            ""+log.event+" para_credencial "+log.args.para_credencial
+          app.imprimirEventoEnConsola(
+            log,
+            log.event+" para_credencial "+log.args.para_credencial
           )
         else
-          app.actualizarEstado("error en vigencia_testificada"+error)
+          app.imprimirEnConsola("error en vigencia_testificada"+error)
       })
       return verificador_de_vigencias_deployed
     })
     .then(function(verificador_de_vigencias_deployed) {
       return verificador_de_vigencias_deployed.vigencia_consultada(function(error,log){
         if(!error)
-          app.actualizarEstado(
+          app.imprimirEventoEnConsola(
+            log,
             log.event+" para_credencial "+log.args.para_credencial+
             " cuya_vigencia_es "+log.args.cuya_vigencia_es
           )
         else
-          app.actualizarEstado("error en vigencia_consultada "+error)
+          app.imprimirEnConsola("error en vigencia_consultada "+error)
       })
     })
 
@@ -113,11 +131,12 @@ window.App = {
     .then(function(autorizador_de_electores_deployed) {
       return autorizador_de_electores_deployed.elector_autorizado(function(error,log){
         if(!error)
-          app.actualizarEstado(
+          app.imprimirEventoEnConsola(
+            log,
             log.event+" de_credencial "+log.args.de_credencial
           )
         else
-          app.actualizarEstado("error en elector_autorizado "+error)
+          app.imprimirEvento("error en elector_autorizado "+error)
       })
     })
     .then(function() {
@@ -126,21 +145,17 @@ window.App = {
     .then(function(autorizador_de_electores_deployed) {
       return autorizador_de_electores_deployed.elector_no_tiene_permiso_de_votar(function(error,log){
         if(!error)
-          app.actualizarEstado(
+          app.imprimirEventoEnConsola(
+            log,
             log.event+" a_causa_de "+log.args.a_causa_de+" de_credencial "+log.args.de_credencial
           )
         else
-          app.actualizarEstado("error en elector_no_tiene_permiso_de_votar "+error)
+          app.imprimirEnConsola("error en elector_no_tiene_permiso_de_votar "+error)
       })
     })
     .then(function() {
       app.test()
     })
-  },
-
-  actualizarEstado: function(message){
-    var status = document.getElementById("status")
-    status.insertAdjacentHTML('beforeend',"<p>"+message)
   },
 
   testificar_vigencia: function(){
@@ -149,11 +164,11 @@ window.App = {
     OCR = document.getElementById("OCR").value
     verificador_de_vigencias.deployed()
     .then(function(verificador_de_vigencias_deployed){
-      var hash_OCR = web3.sha3(OCR)
-      return verificador_de_vigencias_deployed.testificar_vigencia(hash_OCR)
+      var hash_OCR_CIC = web3.sha3(OCR)
+      return verificador_de_vigencias_deployed.testificar_vigencia(hash_OCR_CIC)
     })
     .catch(function(e){
-      app.actualizarEstado("error al testificar_vigencia "+e)
+      app.imprimirEnConsola("error al testificar_vigencia "+e)
       console.log("error al testificar_vigencia "+e)
     })
 
@@ -165,11 +180,11 @@ window.App = {
     OCR = document.getElementById("OCR").value
     verificador_de_vigencias.deployed()
     .then(function(verificador_de_vigencias_deployed){
-      var hash_OCR = web3.sha3(OCR)
-      return verificador_de_vigencias_deployed.consultar_vigencia(hash_OCR)
+      var hash_OCR_CIC = web3.sha3(OCR)
+      return verificador_de_vigencias_deployed.consultar_vigencia(hash_OCR_CIC)
     })
     .catch(function(e) {
-      app.actualizarEstado("error al consultar_vigencia")
+      app.imprimirEnConsola("error al consultar_vigencia")
       console.log("error al consultar_vigencia",e)
     })
   },
@@ -180,15 +195,15 @@ window.App = {
     OCR = document.getElementById("OCR").value
     autorizador_de_electores.deployed()
     .then(function(autorizador_de_electores_deployed){
-      var hash_OCR = Web3Utils.sha3(OCR)
+      var hash_OCR_CIC = Web3Utils.sha3(OCR)
       return autorizador_de_electores_deployed.procesar_voto(
         por_el_candidato,
-        hash_OCR,
+        hash_OCR_CIC,
         {from: accounts[1]}
       )
     })
     .catch(function(e) {
-      app.actualizarEstado("error al procesar_voto")
+      app.imprimirEnConsola("error al procesar_voto")
       console.log("error al procesar_voto",e)
     })
   },
@@ -196,13 +211,16 @@ window.App = {
   test: function() {
     var 
     app = this,
-    OCR = "21206852hef80237940z",
+    OCR = "0364087089879",
+    CIC = "1657527522",
     autorizador_de_electores_deployed,
-    hash_OCR
+    hash_OCR_CIC
     verificador_de_vigencias.deployed()
     .then(function(verificador_de_vigencias_deployed){
-      hash_OCR = web3.sha3(OCR)
-      return verificador_de_vigencias_deployed.testificar_vigencia(hash_OCR)
+      var OCR_CIC = OCR + "02" + CIC.substring(0,CIC.length-1)
+      app.imprimirEnConsola("OCR_CIC "+OCR_CIC)
+      hash_OCR_CIC = web3.sha3(OCR_CIC)
+      return verificador_de_vigencias_deployed.testificar_vigencia(hash_OCR_CIC)
     })
     .then(function(){
       return autorizador_de_electores.deployed()
@@ -220,11 +238,11 @@ window.App = {
     .then(function(){
       return autorizador_de_electores_deployed.procesar_voto(
         "Anaya",
-        hash_OCR
+        hash_OCR_CIC
       )
     })
     .catch(function(e) {
-      app.actualizarEstado("test: error al procesar_voto "+e)
+      app.imprimirEnConsola("test: error al procesar_voto "+e)
       console.log("test: error al procesar_voto",e)
     })
   }

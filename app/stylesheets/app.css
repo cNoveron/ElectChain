@@ -161,3 +161,9 @@ h3 {
   margin: 2rem 0;
   background-color: #eff5ff;
 }
+
+p.timestamp {
+  display: inline;
+  color: #7291ff;
+  font-style: italic;
+}
