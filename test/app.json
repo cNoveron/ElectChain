@@ -1,0 +1,8 @@
+{
+    "name":"ElectChain",
+    "description":"El uso de tecnología blockchain garantiza la integridad del estado de las votaciones.",
+    "repository":"https://github.com/carlosescom/sentiment.ofnation",
+    "logo":"http://www.electchain.io/static/img/logo.7abf8cb.png",
+    "keywords":["elecciones","blockchain"],
+    "image":"heroku/nodejs"
+}

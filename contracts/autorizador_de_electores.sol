@@ -1,7 +1,7 @@
 pragma solidity ^0.4.17;
 
-import './contador_de_votos.sol';
-import './verificador_de_vigencias.sol';
+import "./contador_de_votos.sol";
+import "./verificador_de_vigencias.sol";
 
 contract autorizador_de_electores{
     // Rinkeby: 
@@ -12,23 +12,16 @@ contract autorizador_de_electores{
     // de electores que han sido marcados por haber emitido un único voto.
     mapping(bytes => bool) marca_de_emision_de_voto_desde_bytes;
 
-    /*  El presente contrato se hará referencia a la instancia de otro contrato 
-        llamado */contador_de_votos/*, y para accesar a sus funciones se hará 
-        referencia a la instancia de dicho contrato por medio de un identificador
-        llamado "*/uso_de_contador_de_votos_para;/*.
-        
-        El presente contrato se hará referencia a la instancia de otro contrato 
-        llamado */verificador_de_vigencias/*, y para accesar a sus funciones se hará 
-        referencia a la instancia de dicho contrato por medio de un identificador
-        llamado "*/uso_de_verificador_de_vigencias_para;/*.
-    */
+    contador_de_votos uso_de_contador_de_votos_para;
+    verificador_de_vigencias uso_de_verificador_de_vigencias_para;
 
     constructor(
         address donde_reside_el_contador_de_votos,
         address donde_reside_el_verificador_de_vigencias
     ) 
     public{
-    /*  Dicho identificador hace referencia a la única copia del contrato llamado
+    /*  
+        Dicho identificador hace referencia a la única copia del contrato llamado
         */uso_de_contador_de_votos_para/* 
         la única copia del contrato*/ = /* llamado */contador_de_votos/* 
         que se alojará en la dirección */(donde_reside_el_contador_de_votos);/*
@@ -60,11 +53,11 @@ contract autorizador_de_electores{
         }
     }
 
-    event elector_autorizado(
+    event elector_autorizado_para_votar(
         bytes de_credencial
     );
     
-    event elector_no_tiene_permiso_de_votar(
+    event elector_sin_permiso_para_votar(
         string a_causa_de,
         bytes de_credencial
     );
