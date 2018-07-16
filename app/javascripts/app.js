@@ -129,28 +129,42 @@ window.App = {
 
     autorizador_de_electores.deployed()
     .then(function(autorizador_de_electores_deployed) {
-      return autorizador_de_electores_deployed.elector_autorizado(function(error,log){
+      return autorizador_de_electores_deployed.se_autorizo_para_votar_al_elector(function(error,log){
         if(!error)
           app.imprimirEventoEnConsola(
             log,
             log.event+" de_credencial "+log.args.de_credencial
           )
         else
-          app.imprimirEvento("error en elector_autorizado "+error)
+          app.imprimirEvento("error cuando se_autorizo_para_votar_al_elector "+error)
       })
     })
     .then(function() {
       return autorizador_de_electores.deployed()
     })
     .then(function(autorizador_de_electores_deployed) {
-      return autorizador_de_electores_deployed.elector_no_tiene_permiso_de_votar(function(error,log){
+      return autorizador_de_electores_deployed.se_detecto_un_voto_previamente_emitido(function(error,log){
         if(!error)
           app.imprimirEventoEnConsola(
             log,
             log.event+" a_causa_de "+log.args.a_causa_de+" de_credencial "+log.args.de_credencial
           )
         else
-          app.imprimirEnConsola("error en elector_no_tiene_permiso_de_votar "+error)
+          app.imprimirEnConsola("error cuando se_detecto_un_voto_previamente_emitido "+error)
+      })
+    })
+    .then(function() {
+      return autorizador_de_electores.deployed()
+    })
+    .then(function(autorizador_de_electores_deployed) {
+      return autorizador_de_electores_deployed.se_obtuvo_negativa_al_consultar_vigencia(function(error,log){
+        if(!error)
+          app.imprimirEventoEnConsola(
+            log,
+            log.event+" de_credencial "+log.args.de_credencial
+          )
+        else
+          app.imprimirEnConsola("error cuando se_obtuvo_negativa_al_consultar_vigencia "+error)
       })
     })
     .then(function() {

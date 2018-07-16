@@ -20,7 +20,9 @@ contract contador_de_votos{
         conteo_de_candidato_con_apellido["López"]     = 0;
         conteo_de_candidato_con_apellido["Meade"]     = 0;
         conteo_de_candidato_con_apellido["Rodríguez"] = 0;
-        uso_de_autorizador_de_direcciones_para = autorizador_de_direcciones(donde_reside_el_autorizador_de_direcciones);
+        uso_de_autorizador_de_direcciones_para = autorizador_de_direcciones(
+            donde_reside_el_autorizador_de_direcciones
+        );
     }
     
     // La llamada para la contabilidad de un voto será emitida por el
