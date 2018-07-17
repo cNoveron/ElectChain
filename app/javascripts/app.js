@@ -71,23 +71,35 @@ window.App = {
     var status = document.getElementById("status")
     status.insertAdjacentHTML(
       'beforeend',
-      "<p>"+message
+      message
     )
   },
 
   imprimirEventoEnConsola: function(log,message){
     this.imprimirEnConsola(
-      "<p class=\"timestamp\">"+new Date(web3.eth.getBlock(log.blockNumber).timestamp*1000)+"</p>"+
-      " >> "+message
+      "<p class=\"timestamp\">"+new Date(web3.eth.getBlock(log.blockNumber).timestamp*1000)+
+      ">> </p><p> "+message+
+      "</p>"
     )
   },
 
   placeListeners: function(){
-    var app = this
+    var 
+    app = this
+
+    // var filter = web3.shh.filter({topics:[]})
+
+    // // watch for changes
+    // filter.watch(function(error, result){
+    //   if (!error)
+    //     console.log(result);
+    // })
 
     contador_de_votos.deployed()
     .then(function(contador_de_votos_deployed){
-      contador_de_votos_deployed.voto_emitido(function(error,log){
+      contador_de_votos_deployed.voto_emitido(function(error,log){        
+        if(!error)
+          console.log(log)
         if(!error)
           app.imprimirEventoEnConsola(
             log,
@@ -147,7 +159,7 @@ window.App = {
         if(!error)
           app.imprimirEventoEnConsola(
             log,
-            log.event+" a_causa_de "+log.args.a_causa_de+" de_credencial "+log.args.de_credencial
+            log.event+" de_credencial "+log.args.de_credencial
           )
         else
           app.imprimirEnConsola("error cuando se_detecto_un_voto_previamente_emitido "+error)
@@ -232,7 +244,7 @@ window.App = {
     verificador_de_vigencias.deployed()
     .then(function(verificador_de_vigencias_deployed){
       var OCR_CIC = OCR + "02" + CIC.substring(0,CIC.length-1)
-      app.imprimirEnConsola("OCR_CIC "+OCR_CIC)
+      app.imprimirEnConsola("<p>OCR_CIC "+OCR_CIC+"</p>")
       hash_OCR_CIC = web3.sha3(OCR_CIC)
       return verificador_de_vigencias_deployed.testificar_vigencia(hash_OCR_CIC)
     })

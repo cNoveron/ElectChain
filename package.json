@@ -37,7 +37,22 @@
   "dependencies": {
     "abi-decoder": "^1.1.0",
     "ethereum-tx-decoder": "^2.0.1",
+    "less": "^3.7.1",
     "truffle-hdwallet-provider": "0.0.5",
+    "underscore": "^1.9.1",
     "web3-utils": "^1.0.0-beta.34"
-  }
+  },
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carlosescom/sentiment.ofnation.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/carlosescom/sentiment.ofnation/issues"
+  },
+  "homepage": "https://github.com/carlosescom/sentiment.ofnation#readme"
 }
