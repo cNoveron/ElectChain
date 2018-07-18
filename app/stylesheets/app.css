@@ -1,5 +1,4 @@
 body {
-  /*  margin-top: 10%; */
   font-family: "Open Sans", sans-serif;
   background-size: cover;
 }
@@ -40,12 +39,6 @@ h3 {
 }
 .black {
   color: black;
-}
-#console {
-  max-height: 800px;
-  position: fixed;
-  overflow: hidden;
-  bottom: 100px;
 }
 .hint {
   color: #666;
@@ -161,4 +154,25 @@ p {
 }
 #console_head {
   background: #000;
+  color: #fff;
+  padding: 0.3em 0;
+}
+#console {
+  max-height: 800px;
+  overflow: hidden;
+  bottom: 100px;
+  border: none!important;
+}
+#console code {
+  color: #65d3ff;
+}
+#console code .por_candidato_de_apellidos {
+  color: #a0ff81!important;
+  background: #5e9a89;
+  padding: 0 0 0 8px;
+  border-radius: 5px;
+}
+#console #console_head,
+#console #console_content {
+  padding-left: 1em;
 }

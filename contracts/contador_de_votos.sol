@@ -35,7 +35,7 @@ contract contador_de_votos{
         if(unico_autorizado==msg.sender){ */
         // Esta función recordará el conteo actualizado del candidato para
         // usarlo posteriormente, a la hora de emitir una notificación para toda la red.
-            uint24 conteo_de_votos_del_candidato = ++ conteo_de_candidato_con_apellido[del_candidato];
+        uint24 conteo_de_votos_del_candidato = ++ conteo_de_candidato_con_apellido[del_candidato];
         // El conteo del candidato se habrá de actualizar antes de ser recordado.        
         
         // Se emitirá una notificación en la red sobre el cambio en el conteo

@@ -9,7 +9,7 @@ contract autorizador_de_direcciones{
     
     function asignar(address donde_reside, string del_contrato)
     external{
-        require(msg.sender==0x7ef04eDa8f25222ceff421c76Aba68752ced0773);
+        require(msg.sender==0xC7e76e5f1D33BE441E890a7F2aCE9468f40345C7);
         direccion_desde_nombre[del_contrato] = donde_reside;
     }
     
