@@ -42,10 +42,10 @@ window.App = {
 
   getAccounts: function(){
     var app = this
+    console.log(web3)
     web3.eth.getAccounts(
       function(err, passed_accounts){
         if (err != null) {
-          alert("There was an error fetching your accounts.")
           console.log("There was an error fetching your accounts.")
           return
         }
@@ -62,65 +62,73 @@ window.App = {
         verificador_de_vigencias.defaults({from: account})
         autorizador_de_electores.defaults({from: account})
         app.placeListeners()
+        app.placeFilters()
       }
     )
   },
 
-  apenderElementoEnConsola: function(message_class, message){
-    document.getElementById("console_content").insertAdjacentHTML(
+  apenderTextoEnConsola: function(message){
+    document.getElementById('mensajes_de_la_consola').insertAdjacentHTML(
       'beforeend',
-      "<code class=\""+message_class+"\">"+message+" </code>"
+      '<code>'+message+' </code>'
     )
   },
 
-  apenderElementoConNombreEnConsola: function(message_class, message){
-    this.apenderElementoEnConsola(message_class,message_class+" "+message)
+  apenderDatoEnConsola: function(message_class, message){
+    document.getElementById('mensajes_de_la_consola').insertAdjacentHTML(
+      'beforeend',
+      '<code class=\"'+message_class+'\">'+message+' </code>'
+    )
   },
 
-  imprimirEventoEnConsola: function(log, message){
-    this.apenderElementoEnConsola(
-      "timestamp",new Date(web3.eth.getBlock(log.blockNumber).timestamp*1000)
+  apenderClaseDatoEnConsola: function(message_class, message){
+    this.apenderDatoEnConsola(message_class,message_class+" "+message)
+  },
+
+  saltoDeLineaEnConsola: function(){
+    document.getElementById('mensajes_de_la_consola').insertAdjacentHTML(
+      'beforeend',
+      '<br>'
     )
-    this.apenderElementoEnConsola(
-      "message",message+"<br>"
+  },
+
+  placeFilters: function(){
+/*     var filter = web3.shh.subscribe(
+      "messages",
+      {topics: ["por_candidato_de_apellidos"]}
     )
+
+    filter.watch(function(error, result){
+      if (!error)
+        app.apenderDatoEnConsola("result",result)
+    })  */
   },
 
   placeListeners: function(){
     var 
     app = this
 
-    // var filter = web3.shh.filter({topics:[]})
-
-    // // watch for changes
-    // filter.watch(function(error, result){
-    //   if (!error)
-    //     console.log(result);
-    // })
-
     contador_de_votos.deployed()
     .then(function(contador_de_votos_deployed){
       contador_de_votos_deployed.voto_emitido(function(error,log){
         if(!error){
           console.log(log)
-          app.apenderElementoEnConsola(
-            "",new Date(web3.eth.getBlock(log.blockNumber).timestamp*1000)
-          ) 
-          app.apenderElementoEnConsola(
+          app.apenderDatoEnConsola(
             "",log.event
           )
-          app.apenderElementoConNombreEnConsola(
+          app.apenderClaseDatoEnConsola(
             "por_candidato_de_apellidos",Web3Utils.toAscii(log.args.por_candidato_de_apellidos)
           )
-          app.apenderElementoConNombreEnConsola(
+          app.apenderClaseDatoEnConsola(
             "cuyo_conteo_incremento_a",log.args.cuyo_conteo_incremento_a.c
           )
-          app.apenderElementoConNombreEnConsola(
+          app.apenderClaseDatoEnConsola(
             "transactionHash",log.transactionHash
           ) 
+          app.saltoDeLineaEnConsola()
         }
         else
-          app.apenderElementoEnConsola(error,"error en voto_emitido "+error)
+          app.apenderDatoEnConsola(error,"error en voto_emitido "+error)
       })
       return contador_de_votos_deployed
     })
@@ -128,26 +136,25 @@ window.App = {
     verificador_de_vigencias.deployed()
     .then(function(verificador_de_vigencias_deployed){
       verificador_de_vigencias_deployed.vigencia_testificada(function(error,log){
-        if(!error)          
-          app.imprimirEventoEnConsola(
-            log,
+        if(!error){
+          console.log(log)
+          app.apenderTextoEnConsola(
             log.event+" para_credencial "+log.args.para_credencial
           )
-        else
-          app.apenderElementoEnConsola(error,"error en vigencia_testificada"+error)
+        }else
+          app.apenderDatoEnConsola(error,"error en vigencia_testificada"+error)
       })
       return verificador_de_vigencias_deployed
     })
     .then(function(verificador_de_vigencias_deployed) {
       return verificador_de_vigencias_deployed.vigencia_consultada(function(error,log){
         if(!error)
-          app.imprimirEventoEnConsola(
-            log,
+          app.apenderTextoEnConsola(
             log.event+" para_credencial "+log.args.para_credencial+
             " cuya_vigencia_es "+log.args.cuya_vigencia_es
           )
         else
-          app.apenderElementoEnConsola(error,"error en vigencia_consultada "+error)
+          app.apenderDatoEnConsola(error,"error en vigencia_consultada "+error)
       })
     })
 
@@ -155,12 +162,11 @@ window.App = {
     .then(function(autorizador_de_electores_deployed) {
       return autorizador_de_electores_deployed.se_autorizo_para_votar_al_elector(function(error,log){
         if(!error)
-          app.imprimirEventoEnConsola(
-            log,
+          app.apenderTextoEnConsola(
             log.event+" de_credencial "+log.args.de_credencial
           )
         else
-          app.apenderElementoEnConsola(error,"error cuando se_autorizo_para_votar_al_elector "+error)
+          app.apenderDatoEnConsola(error,"error cuando se_autorizo_para_votar_al_elector "+error)
       })
     })
     .then(function() {
@@ -169,12 +175,11 @@ window.App = {
     .then(function(autorizador_de_electores_deployed) {
       return autorizador_de_electores_deployed.se_detecto_un_voto_previamente_emitido(function(error,log){
         if(!error)
-          app.imprimirEventoEnConsola(
-            log,
+          app.apenderTextoEnConsola(
             log.event+" de_credencial "+log.args.de_credencial
           )
         else
-          app.apenderElementoEnConsola(error,"error cuando se_detecto_un_voto_previamente_emitido "+error)
+          app.apenderDatoEnConsola(error,"error cuando se_detecto_un_voto_previamente_emitido "+error)
       })
     })
     .then(function() {
@@ -183,12 +188,11 @@ window.App = {
     .then(function(autorizador_de_electores_deployed) {
       return autorizador_de_electores_deployed.se_obtuvo_negativa_al_consultar_vigencia(function(error,log){
         if(!error)
-          app.imprimirEventoEnConsola(
-            log,
+          app.apenderTextoEnConsola(
             log.event+" de_credencial "+log.args.de_credencial
           )
         else
-          app.apenderElementoEnConsola(error,"error cuando se_obtuvo_negativa_al_consultar_vigencia "+error)
+          app.apenderDatoEnConsola(error,"error cuando se_obtuvo_negativa_al_consultar_vigencia "+error)
       })
     })
     .then(function() {
@@ -206,7 +210,7 @@ window.App = {
       return verificador_de_vigencias_deployed.testificar_vigencia(hash_OCR_CIC)
     })
     .catch(function(e){
-      app.apenderElementoEnConsola("error al testificar_vigencia "+e)
+      app.apenderDatoEnConsola("error al testificar_vigencia "+e)
       console.log("error al testificar_vigencia "+e)
     })
 
@@ -222,7 +226,7 @@ window.App = {
       return verificador_de_vigencias_deployed.consultar_vigencia(hash_OCR_CIC)
     })
     .catch(function(e) {
-      app.apenderElementoEnConsola("error al consultar_vigencia")
+      app.apenderDatoEnConsola("error al consultar_vigencia")
       console.log("error al consultar_vigencia",e)
     })
   },
@@ -241,7 +245,7 @@ window.App = {
       )
     })
     .catch(function(e) {
-      app.apenderElementoEnConsola("error al procesar_voto")
+      app.apenderDatoEnConsola("error al procesar_voto")
       console.log("error al procesar_voto",e)
     })
   },
@@ -280,7 +284,7 @@ window.App = {
       )
     })
     .catch(function(e) {
-      app.apenderElementoEnConsola(e,"test: error al procesar_voto "+e)
+      app.apenderDatoEnConsola(e,"test: error al procesar_voto "+e)
       console.log("test: error al procesar_voto",e)
     })
   }

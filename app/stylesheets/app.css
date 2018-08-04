@@ -173,6 +173,6 @@ p {
   border-radius: 5px;
 }
 #console #console_head,
-#console #console_content {
+#console #mensajes_de_la_consola {
   padding-left: 1em;
 }
